@@ -41,7 +41,7 @@ provider "vault" {
 #staging.tfvars
 #prod.tfvars
  
-
+#
 resource "vault_audit" "audit_dev" {
   provider = vault.vault_dev
   type     = "file"
@@ -69,7 +69,7 @@ resource "vault_audit" "audit_prod" {
   }
 }
 
-
+# user auth
 resource "vault_auth_backend" "userpass_dev" {
   provider = vault.vault_dev
   type     = "userpass"
@@ -85,6 +85,7 @@ resource "vault_auth_backend" "userpass_prod" {
   type     = "userpass"
 }
 
+#account
 
 resource "vault_generic_secret" "account_development" {
   provider = vault.vault_dev
@@ -122,6 +123,7 @@ resource "vault_generic_endpoint" "account_development" {
 }
 EOT
 }
+# gateway
 
 resource "vault_generic_secret" "gateway_development" {
   provider = vault.vault_dev
@@ -159,6 +161,9 @@ resource "vault_generic_endpoint" "gateway_development" {
 }
 EOT
 }
+
+# payment
+
 resource "vault_generic_secret" "payment_development" {
   provider = vault.vault_dev
   path     = "secret/development/payment"
@@ -195,6 +200,8 @@ resource "vault_generic_endpoint" "payment_development" {
 }
 EOT
 }
+
+# account
 
 resource "vault_generic_secret" "account_production" {
   provider = vault.vault_prod
@@ -307,6 +314,8 @@ resource "vault_generic_endpoint" "payment_production" {
 EOT
 }
 
+#container -----------------
+
 resource "docker_container" "account_production" {
   image = "form3tech-oss/platformtest-account"
   name  = "account_production"
@@ -367,6 +376,8 @@ resource "docker_container" "payment_production" {
   }
 }
 
+# dev ------------------------
+
 resource "docker_container" "account_development" {
   image = "form3tech-oss/platformtest-account"
   name  = "account_development"
@@ -420,6 +431,68 @@ resource "docker_container" "payment_development" {
 
   networks_advanced {
     name = "vagrant_development"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+# staging ----------------------------
+
+resource "docker_container" "account_staging" {
+  image = "form3tech-oss/platformtest-account"
+  name  = "account_staging"
+
+  env = [
+    "VAULT_ADDR=http://vault-staging:8200",
+    "VAULT_USERNAME=account_staging",
+    "VAULT_PASSWORD=123-account_staging",
+    "ENVIRONMENT=staging"
+  ]
+
+  networks_advanced {
+    name = "vagrant_staging"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "docker_container" "gateway_staging" {
+  image = "form3tech-oss/platformtest-gateway"
+  name  = "gateway_staging"
+
+  env = [
+    "VAULT_ADDR=http://vault-staging:8200",
+    "VAULT_USERNAME=gateway-staging",
+    "VAULT_PASSWORD=123-gateway-staging",
+    "ENVIRONMENT=staging"
+  ]
+
+  networks_advanced {
+    name = "vagrant_staging"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "docker_container" "payment_staging" {
+  image = "form3tech-oss/platformtest-payment"
+  name  = "payment_staging"
+
+  env = [
+    "VAULT_ADDR=http://vault-staging:8200",
+    "VAULT_USERNAME=payment-staging",
+    "VAULT_PASSWORD=123-payment-staging",
+    "ENVIRONMENT=staging"
+  ]
+
+  networks_advanced {
+    name = "vagrant_staging"
   }
 
   lifecycle {
