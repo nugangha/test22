@@ -25,7 +25,7 @@ services:
     ports:
       - "8401:8200"
     environment:
-      - VAULT_DEV_ROOT_TOKEN_ID=083672fc-4471-4ec4-9b59-a285e463a973
+      - VAULT_DEV_ROOT_TOKEN_ID=96ddf4bc-d217-f3ba-f9bd-017055595017
 
     # production    
   vault-production:
