@@ -1,5 +1,107 @@
+ terraform {
+  required_version = ">= 0.1.0.7"
+
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "2.15.0"
+    }
+
+    vault = {
+      version = "3.0.1"
+    }
+  }
+}
+
+provider "vault" {
+  address = "http://localhost:8201"
+  token   = "f23612cf-824d-4206-9e94-e31a6dc8ee8d"
+}
+
+provider "vault" {
+  alias   = "vault_dev"
+  address = "http://localhost:8201"
+  token   = "f23612cf-824d-4206-9e94-e31a6dc8ee8d"
+}
+
+provider "vault" {
+  alias   = "vault_staging"
+  address = "http://localhost:8401"
+  token   = "f23612cf-824d-4206-9e94-e31a6dc8ee8d"
+}
+
+provider "vault" {
+  alias   = "vault_prod"
+  address = "http://localhost:8301"
+  token   = "083672fc-4471-4ec4-9b59-a285e463a973"
+}
+                                              #---------------------------
+
+variable "provider" {
+   type = map(string)
+   default = {
+      dev = "vault.vault_dev"
+      staging = "vault.vault_staging"
+      production = "vault.vault_prod"  
+
+   }
+}
+
+#accual values inside here
+dev.tfvars
+staging.tfvars
+prod.tfvars
+
+# modify provider by using lookup function and adding staging 
+
+resource "vault_audit" "audit_dev" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "file"
+
+  options = {
+    file_path = "/vault/logs/audit"
+  }
+}
+
+resource "vault_audit" "audit_staging" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "file"
+
+  options = {
+    file_path = "/vault/logs/audit"
+  }
+}
+
+resource "vault_audit" "audit_prod" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "file"
+
+  options = {
+    file_path = "/vault/logs/audit"
+  }
+}
+
+# modify provider added staging
+
+resource "vault_auth_backend" "userpass_dev" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "userpass"
+}
+
+resource "vault_auth_backend" "userpass_staging" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "userpass"
+}
+
+resource "vault_auth_backend" "userpass_prod" {
+  provider = lookup(var.provider, terraform.workspace)
+  type     = "userpass"
+}
+
+# modify account using  var.provider
+
 resource "vault_generic_secret" "account_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/development/account"
 
   data_json = <<EOT
@@ -11,20 +113,18 @@ EOT
 }
 
 resource "vault_policy" "account_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   name     = "account-development"
 
   policy = <<EOT
-
 path "secret/data/development/account" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "account_development" {
-  provider             = vault.vault_dev
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_dev]
   path                 = "auth/userpass/users/account-development"
   ignore_absent_fields = true
@@ -37,8 +137,10 @@ resource "vault_generic_endpoint" "account_development" {
 EOT
 }
 
+#gateway
+
 resource "vault_generic_secret" "gateway_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/development/gateway"
 
   data_json = <<EOT
@@ -50,20 +152,18 @@ EOT
 }
 
 resource "vault_policy" "gateway_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   name     = "gateway-development"
 
   policy = <<EOT
-
 path "secret/data/development/gateway" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "gateway_development" {
-  provider             = vault.vault_dev
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_dev]
   path                 = "auth/userpass/users/gateway-development"
   ignore_absent_fields = true
@@ -76,7 +176,7 @@ resource "vault_generic_endpoint" "gateway_development" {
 EOT
 }
 resource "vault_generic_secret" "payment_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/development/payment"
 
   data_json = <<EOT
@@ -88,20 +188,18 @@ EOT
 }
 
 resource "vault_policy" "payment_development" {
-  provider = vault.vault_dev
+  provider = lookup(var.provider, terraform.workspace)
   name     = "payment-development"
 
   policy = <<EOT
-
 path "secret/data/development/payment" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "payment_development" {
-  provider             = vault.vault_dev
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_dev]
   path                 = "auth/userpass/users/payment-development"
   ignore_absent_fields = true
@@ -115,7 +213,7 @@ EOT
 }
 
 resource "vault_generic_secret" "account_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/production/account"
 
   data_json = <<EOT
@@ -127,20 +225,18 @@ EOT
 }
 
 resource "vault_policy" "account_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   name     = "account-production"
 
   policy = <<EOT
-
 path "secret/data/production/account" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "account_production" {
-  provider             = vault.vault_prod
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_prod]
   path                 = "auth/userpass/users/account-production"
   ignore_absent_fields = true
@@ -154,7 +250,7 @@ EOT
 }
 
 resource "vault_generic_secret" "gateway_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/production/gateway"
 
   data_json = <<EOT
@@ -166,20 +262,18 @@ EOT
 }
 
 resource "vault_policy" "gateway_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   name     = "gateway-production"
 
   policy = <<EOT
-
 path "secret/data/production/gateway" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "gateway_production" {
-  provider             = vault.vault_prod
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_prod]
   path                 = "auth/userpass/users/gateway-production"
   ignore_absent_fields = true
@@ -193,7 +287,7 @@ EOT
 }
 
 resource "vault_generic_secret" "payment_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   path     = "secret/production/payment"
 
   data_json = <<EOT
@@ -205,20 +299,18 @@ EOT
 }
 
 resource "vault_policy" "payment_production" {
-  provider = vault.vault_prod
+  provider = lookup(var.provider, terraform.workspace)
   name     = "payment-production"
 
   policy = <<EOT
-
 path "secret/data/production/payment" {
     capabilities = ["list", "read"]
 }
-
 EOT
 }
 
 resource "vault_generic_endpoint" "payment_production" {
-  provider             = vault.vault_prod
+  provider             = lookup(var.provider, terraform.workspace)
   depends_on           = [vault_auth_backend.userpass_prod]
   path                 = "auth/userpass/users/payment-production"
   ignore_absent_fields = true
