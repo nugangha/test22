@@ -60,25 +60,6 @@ resource "docker_container" "payment_production" {
 
 # dev ------------------------
 
-resource "docker_container" "account_development" {
-  image = "form3tech-oss/platformtest-account"
-  name  = "account_development"
-
-  env = [
-    "VAULT_ADDR=http://vault-development:8200",
-    "VAULT_USERNAME=account-development",
-    "VAULT_PASSWORD=123-account-development",
-    "ENVIRONMENT=development"
-  ]
-
-  networks_advanced {
-    name = "vagrant_development"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
 
 resource "docker_container" "gateway_development" {
   image = "form3tech-oss/platformtest-gateway"
