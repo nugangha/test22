@@ -73,3 +73,45 @@ resource "vault_generic_endpoint" "account_production" {
 }
 EOT
 }
+
+#--------------------
+resource "docker_container" "account_development" {
+  image = "form3tech-oss/platformtest-account"
+  name  = "account_development"
+
+  env = [
+    "VAULT_ADDR=http://vault-development:8200",
+    "VAULT_USERNAME=account-development",
+    "VAULT_PASSWORD=123-account-development",
+    "ENVIRONMENT=development"
+  ]
+
+  networks_advanced {
+    name = "vagrant_development"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "docker_container" "account_production" {
+  image = "form3tech-oss/platformtest-account"
+  name  = "account_production"
+
+  env = [
+    "VAULT_ADDR=http://vault-production:8200",
+    "VAULT_USERNAME=account-production",
+    "VAULT_PASSWORD=123-account-production",
+    "ENVIRONMENT=production"
+  ]
+
+  networks_advanced {
+    name = "vagrant_production"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
