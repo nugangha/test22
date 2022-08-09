@@ -23,13 +23,13 @@ provider "vault" {
   address = "http://localhost:8201"
   token   = "f23612cf-824d-4206-9e94-e31a6dc8ee8d"
 }
-
+/*
 provider "vault" {
   alias   = "vault_staging"
   address = "http://localhost:8401"
   token   = "f23612cf-824d-4206-9e94-e31a6dc8ee8d"
 }
-
+*/
 provider "vault" {
   alias   = "vault_prod"
   address = "http://localhost:8301"
