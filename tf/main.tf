@@ -1,3 +1,4 @@
+/*
 resource "docker_container" "account_staging" {
   image = "form3tech-oss/platformtest-account"
   name  = "account_staging"
@@ -57,3 +58,4 @@ resource "docker_container" "payment_staging" {
     ignore_changes = all
   }
 }
+*/
