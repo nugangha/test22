@@ -6,7 +6,7 @@ resource "vault_audit" "audit_dev" {
     file_path = "/vault/logs/audit"
   }
 }
-
+/*
 resource "vault_audit" "audit_staging" {
   provider = vault.vault_staging
   type     = "file"
@@ -15,7 +15,7 @@ resource "vault_audit" "audit_staging" {
     file_path = "/vault/logs/audit"
   }
 }
-
+*/
 resource "vault_audit" "audit_prod" {
   provider = vault.vault_prod
   type     = "file"
